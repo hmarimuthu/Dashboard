@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<project name="eTAAP-Dashboard" basedir=".">
+	<property file="/Users/hema/SpringWorkspace/eTAAP-Dashboard-Rectifier/build.properties" />
+
+	<path id="master-classpath">
+		<fileset dir="${webcontent}/WEB-INF/lib">
+			<include name="*.jar"/>
+		</fileset>
+		<pathelement path="${build.dir}"/>
+	</path>
+	
+	
+	<target name="build" description="Compile main source tree java files">
+		<mkdir dir="${build.dir}"/>
+		<javac destdir="${build.dir}"  debug="true" deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+	</target>
+
+	<target name="deploy" depends="build">
+		<echo message="Deploying to location --> ${deploy.path}">
+		</echo>
+		<copy todir="${deploy.path}/${project.name}" preservelastmodified="true">
+			<fileset dir="${webcontent}">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="deploywar" depends="build,deploy" description="Deploy application as a WAR file">
+		<echo message="war name --> ${project.name}.war" />
+		<echo message="${deploy.path1}" />
+		<war destfile="${project.name}.war" webxml="${webcontent}/WEB-INF/web.xml">
+			<fileset dir="${webcontent}">
+				<include name="**/*.*"/>
+			</fileset>
+		</war>
+
+		<copy todir="${deploy.path}" preservelastmodified="true">
+			<fileset dir=".">
+				<include name="*.war"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean" description="Clean output directories">
+		<delete>
+			<fileset dir="${build.dir}">
+				<include name="**/*.class"/>
+			</fileset>
+		</delete>
+	</target>
+</project>

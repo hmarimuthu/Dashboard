@@ -1,0 +1,117 @@
+{
+	"eTAAPHomePriorityDrillDown":{
+		"title":"Defects by Priority",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT A.APP_NAME AS 'name', COUNT(J.PRIORITY) AS 'y' FROM JIRA J, APPLICATION A WHERE J.PRIORITY<>'' AND J.PRIORITY IN (SELECT P.PRIORITY_NAME FROM PRIORITY P, APPLICATION_SYSTEM_MAP ASM WHERE P.SYS_ID = ASM.SYS_ID AND P.SYS_ID IN (SELECT SYS_ID FROM APPLICATION_SYSTEM_MAP AM WHERE AM.APP_ID=A.APP_ID) AND ASM.APP_ID = A.APP_ID AND ASM.IS_ACTIVE = 1 GROUP BY P.EQUIVALENT_TO) AND J.CREATED < CURRENT_TIMESTAMP AND J.CREATED >= ? AND J.APP_ID = A.APP_ID AND A.STATUS = 1 GROUP BY A.APP_ID;",
+		"drillDownQuery":"SELECT A.APP_NAME AS 'name', J.PRIORITY AS 'data', COUNT(J.PRIORITY) AS 'y' FROM JIRA J, APPLICATION A WHERE J.PRIORITY<>'' AND J.PRIORITY IN (SELECT P.PRIORITY_NAME FROM PRIORITY P, APPLICATION_SYSTEM_MAP ASM WHERE P.SYS_ID = ASM.SYS_ID AND P.SYS_ID IN (SELECT SYS_ID FROM APPLICATION_SYSTEM_MAP AM WHERE AM.APP_ID=A.APP_ID) AND ASM.APP_ID = A.APP_ID AND ASM.IS_ACTIVE = 1 GROUP BY P.EQUIVALENT_TO) AND J.CREATED < CURRENT_TIMESTAMP AND J.CREATED >= ? AND J.APP_ID = A.APP_ID AND A.STATUS = 1 GROUP BY A.APP_ID, J.PRIORITY;"
+	},
+	"eTAAPHomeSeverityDrillDown":{
+		"title":"Defects by Severity",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT A.APP_NAME AS 'name', COUNT(J.SEVERITY) y FROM JIRA J, APPLICATION A WHERE J.SEVERITY<>'' AND J.CREATED < CURRENT_TIMESTAMP AND J.CREATED >= ? AND J.APP_ID = A.APP_ID AND A.STATUS = 1 GROUP BY A.APP_ID;",
+		"drillDownQuery":"SELECT A.APP_NAME AS 'name', J.SEVERITY AS 'DATA', COUNT(J.SEVERITY) y FROM JIRA J, APPLICATION A WHERE J.SEVERITY<>'' AND J.CREATED < CURRENT_TIMESTAMP AND J.CREATED >= ? AND J.APP_ID = A.APP_ID AND A.STATUS = 1 GROUP BY A.APP_ID, J.SEVERITY;"
+	},
+	"eTAAPHomeJenkinsStackColumn":{
+		"title":"Test Automation Results of last build",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"select temp.app_name as categories, je.pass_count as Passed, je.fail_count as Failed, je.skip_count as Skipped from jenkins je, (select app.app_name, app.status, app_map.* from application app, application_system_map app_map where app.app_id=app_map.app_id and app_map.is_default=1 and sys_id in (select sys_id from system_api where api_id=1)) temp where je.app_id = temp.app_id and je.env_id = temp.env_id and je.suite_id = temp.suite_id and je.bed_id = temp.bed_id and je.build_date = (select max(build_date) from jenkins j where temp.app_id=j.app_id and temp.env_id=j.env_id and temp.suite_id=j.suite_id and temp.bed_id=j.bed_id and j.build_date < current_timestamp and j.build_date > ? order by j.build_date desc) and temp.status = 1 order by je.app_id;",
+		"drillDownQuery":""
+	},
+	"eTAAPHomeTestCaseStackQuery":{
+		"title":"Test Case Statistics",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT a.app_name as categories, t.test_case_type as name, SUM(t.test_case_count) as data FROM tcm t, application a  WHERE t.quarter_start_date >= ? AND t.app_id = a.app_id AND a.status = 1 GROUP BY t.app_id, t.test_case_type;",
+		"drillDownQuery":""
+	},
+	"eTAAPHomeDefectsStatistics":{
+		"title":"Defects Statistics",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT DATE_FORMAT(J.CREATED, '%b') as categories, J.STATUS AS name, COUNT(J.STATUS) AS data FROM JIRA J WHERE J.STATUS IN ('CLOSED' , 'NEW', 'IN PROGRESS', 'OPEN') AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY categories, name;",
+		"secondAggregateQuery":""
+	},
+	"eTAAPHomeDefectsLife":{
+		"title":"Defects Life",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT * FROM (SELECT 'Day' as categories,J.SEVERITY AS name,COUNT(J.SEVERITY) AS data FROM JIRA J WHERE J.STATUS IN ('VERIFY') AND J.SEVERITY<>'' AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY J.SEVERITY UNION ALL SELECT 'Week' as categories,J.SEVERITY AS name,COUNT(J.SEVERITY) AS data FROM JIRA J WHERE J.STATUS IN ('VERIFY') AND J.SEVERITY<>'' AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY J.SEVERITY UNION ALL SELECT 'Month' as categories,J.SEVERITY AS name,COUNT(J.SEVERITY) AS data FROM JIRA J WHERE J.STATUS IN ('VERIFY') AND J.SEVERITY<>'' AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY J.SEVERITY) SEVERITY_FINAL_QUERY;",
+		"secondAggregateQuery":"SELECT * FROM (SELECT 'Day' as categories,J.PRIORITY AS name,COUNT(J.PRIORITY) AS data FROM JIRA J WHERE J.STATUS IN ('VERIFY') AND J.PRIORITY<>'' AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY J.PRIORITY UNION ALL SELECT 'Week' as categories,J.PRIORITY AS name,COUNT(J.PRIORITY) AS data FROM JIRA J WHERE J.STATUS IN ('VERIFY') AND J.PRIORITY<>'' AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY J.PRIORITY UNION ALL SELECT 'Month' as categories,J.PRIORITY AS name,COUNT(J.PRIORITY) AS data FROM JIRA J WHERE J.STATUS IN ('VERIFY') AND J.PRIORITY<>'' AND J.CREATED >= ? AND J.CREATED <= ? GROUP BY J.PRIORITY) PRIORITY_FINAL_QUERY"
+	},
+	"eTAAPHomeSprintVelocity":{
+		"title":"Sprint Velocity",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"CALL sprint_velocity();",
+		"secondAggregateQuery":""
+	},
+	"eTAAPHomeWaterTank":{
+		"title":"User Stories Count",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"totalCountQuery":"select count(*) as 'COUNT' from jira_userstory us, jira_sprint s  where us.app_id = s.app_id  and us.sprint_id = s.sprint_id  and us.app_id = ? and us.sprint_id = ?;",
+		"statusCountQuery":"select count(*) as 'COUNT' from jira_userstory us, jira_sprint s  where us.app_id = s.app_id  and us.sprint_id = s.sprint_id  and us.app_id = ?  and us.sprint_id = ?  and us.status in ('Closed')"
+	},
+	"eTAAPCIResults":{
+		"title":"CI Results",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"select DATE_FORMAT(j.build_date, '%b %d') as categories, j.pass_count as Passed, j.fail_count as Failed, j.skip_count as Skipped from jenkins j, application app, environment env, test_suite suite, test_bed bed where j.app_id = app.app_id and j.env_id = env.env_id and j.suite_id = suite.suite_id and j.bed_id = bed.bed_id and app.app_id = ? and env.env_id = ? and suite.suite_id = ? and bed.bed_id = ? and j.build_date between ? and ? and j.build_date in (select max(build_date) from jenkins where app_id = ? and env_id = ? and suite_id = ? and bed_id = ? group by date(build_date)) order by j.build_date desc;",
+		"secondAggregateQuery":""
+	},
+	"Defects_severity":{
+		"title":"Severity",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"select severity as name,count(severity) as y from jira where app_id=? and created between ? and ? and severity != '' group by severity;"
+	},
+	"Defects_severity_env":{
+		"title":"Severity",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"select severity as name,count(severity) as y from jira where app_id=? and env_id=? and created between ? and ? and severity != '' group by severity;"
+	},
+	"Defects_priority":{
+		"title":"Status",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"select status as name,count(status) as y from jira where app_id=? and created between ? and ? and status != '' group by status;"
+	},
+	"Defects_priority_env":{
+		"title":"Status",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"select status as name,count(status) as y from jira where app_id=? and env_id=? and created between ? and ? and status != '' group by status;"
+	},
+	"eTAAPTcmCurrQuarter":{
+		"title":"Defects Statistics",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT t.app_id, t.test_case_type as name , t.test_case_count as data,  t.quarter_start_date,  t.suite_id, s.suite_name as categories FROM tcm t, test_suite s WHERE t.app_id = ?  AND t.quarter_start_date = ? AND t.quarter_end_date = ? AND t.suite_id = s.suite_id order by t.suite_id;",
+		"secondAggregateQuery":""
+	},
+	"eTAAPTcmPrevQuarter":{
+		"title":"Defects Statistics",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT t.app_id, t.test_case_type as name,  t.test_case_type ,SUM(t.test_case_count) as data, t.quarter_start_date as categories FROM tcm t WHERE t.app_id = ? AND t.quarter_start_date >= ? AND t.quarter_end_date <= ?  GROUP BY t.test_case_type, t.quarter_start_date ORDER BY t.quarter_start_date, t.test_case_type;",
+		"secondAggregateQuery":""
+	},
+	"eTAAPHomeVelocity":{
+		"title":"Velocity",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"SELECT distinct s.app_id, s.rapidview_id, s.sprint_id, s.sprint_name  as categories ,  s.start_date, s.end_date, v.estimated as Committed, v.Completed as Completed FROM jira_sprint s, jira_velocity v WHERE s.sprint_id = v.sprint_id and s.rapidview_id = v.rapidview_id  and s.app_id = v.app_id  AND s.app_id = ? AND s.start_date between ? and ? ORDER BY s.sprint_name desc;",
+		"secondAggregateQuery":""
+	},
+	"iterations_userStories":{
+		"title":"user stories",
+		"subTitle":"",
+		"seriesName":"Applications",
+		"aggregateQuery":"call user_stories_call(?,?);",
+	    "secondAggregateQuery":""
+	}
+}

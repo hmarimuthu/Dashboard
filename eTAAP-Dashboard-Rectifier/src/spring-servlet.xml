@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<!-- telling container to take care of annotations stuff -->
+	<context:annotation-config />
+
+	<!-- declaring base package -->
+	<context:component-scan base-package="com.etaap" />
+
+	<!-- registering the DefaultAnnotationHandlerMapping and AnnotationMethodHandlerAdapter beans that are required for Spring MVC -->
+	<mvc:annotation-driven />
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/css/**"/>
+			<mvc:exclude-mapping path="/img/**"/>
+			<mvc:exclude-mapping path="/js/**"/>
+			<mvc:exclude-mapping path="/fonts/**"/>
+			<mvc:exclude-mapping path="/login"/>
+			<mvc:exclude-mapping path="/loginAuth"/>
+			<mvc:exclude-mapping path="/dashboards"/>
+			<bean class="com.etaap.controller.SessionInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- handling GET requests for /resources/** by efficiently serving static content in webapp root dir -->
+	<mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/img/**" location="/img/"/>
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/fonts/**" location="/fonts/" />
+
+	<!-- adding view resolver to show jsp's on browser -->
+ 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+  		<property name="prefix" value="/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- declare beans -->
+	<bean id="applicationDao" class="com.etaap.dao.ApplicationDaoImpl" />
+	<bean id="applicationService" class="com.etaap.services.ApplicationServiceImpl">
+		<qualifier value="app" />
+	</bean>
+	<bean id="environmentDao" class="com.etaap.dao.EnvironmentDaoImpl" />
+	<bean id="environmentService" class="com.etaap.services.EnvironmentServiceImpl">
+		<qualifier value="env" />
+	</bean>
+	<bean id="testBedDao" class="com.etaap.dao.TestBedDaoImpl" />
+	<bean id="testBedService" class="com.etaap.services.TestBedServiceImpl">
+		<qualifier value="testBed" />
+	</bean>
+	<bean id="testSuiteDao" class="com.etaap.dao.TestSuiteDaoImpl" />
+	<bean id="testSuiteService" class="com.etaap.services.TestSuiteServiceImpl">
+		<qualifier value="testSuite" />
+	</bean>
+	<bean id="systemAPIDao" class="com.etaap.dao.SystemAPIDaoImpl" />
+	<bean id="systemAPIService" class="com.etaap.services.SystemAPIServiceImpl">
+		<qualifier value="systemAPI" />
+	</bean>
+	<bean id="timePeriodDao" class="com.etaap.dao.TimePeriodDaoImpl" />
+	<bean id="timePeriodService" class="com.etaap.services.TimePeriodServiceImpl" />
+	<bean id="ciDao" class="com.etaap.dao.CIDaoImpl" />
+	<bean id="ciService" class="com.etaap.services.CIServiceImpl" />
+	<bean id="defectsDao" class="com.etaap.dao.DefectsDaoImpl" />
+	<bean id="defectsService" class="com.etaap.services.DefectsServiceImpl" />
+	
+	<bean id="authServiceImpl" class="com.etaap.services.UserAuthServiceImpl" />
+	<bean id="userAuthDaoImpl" class="com.etaap.dao.UserAuthorizationDaoImpl" />
+	
+	<bean id="tcmServiceImpl" class="com.etaap.services.TcmServiceImpl" />
+	<bean id="tcmDaoImpl" class="com.etaap.dao.TcmDaoImpl" />
+	
+	<bean id="testCaseDao" class="com.etaap.dao.TestCaseDaoImpl" />
+	<bean id="testCaseService" class="com.etaap.services.TestCaseServiceImpl" />
+	
+	<bean id="dashboardDao" class="com.etaap.dao.DashboardDaoImpl" />
+ 	<bean id="dashboardService" class="com.etaap.services.DashboardServiceImpl" />
+	
+	<bean id="schedulerJobsDao" class="com.etaap.dao.SchedulerJobsDaoImpl" />
+ 	<bean id="schedulerJobsService" class="com.etaap.services.SchedulerJobsServiceImpl" />
+
+	<bean id="jenkinsDataPullAPI" class="com.etaap.api.JenkinsDataPullAPI"></bean>
+	<bean id="jiraDataPullAPI" class="com.etaap.api.JiraDataPullAPI"></bean>
+
+	<bean id="velocityService" class="com.etaap.services.VelocityServiceImpl" />
+	<bean id="velocityDao" class="com.etaap.dao.VelocityDaoImpl" />
+	
+	<bean id="iterationsChartService" class="com.etaap.services.IterationsChartServiceImpl" />
+	<bean id="iterationsChartDao" class="com.etaap.dao.IterationsChartDaoImpl" />
+	
+	<bean id="burndownChartService" class="com.etaap.services.BurndownChartServiceImpl" />
+	<bean id="burndownChartDao" class="com.etaap.dao.BurndownChartDaoImpl" />
+	
+	<bean id="userStoryStatusChartService" class="com.etaap.services.UserStoryStatusChartServiceImpl" />
+	<bean id="userStoryStatusChartDao" class="com.etaap.dao.UserStoryStatusChartDaoImpl" />
+	
+	<bean id="userStoryDao" class="com.etaap.dao.UserStoryDaoImpl" />
+	<bean id="userStoryService" class="com.etaap.services.UserStoryServiceImpl" />
+	
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    	<property name="host" value="relay.appriver.com" />
+    	<property name="username" value="" />
+    	<property name="password" value="" />
+    	<property name="javaMailProperties">
+       		<props>
+            	<prop key="mail.smtp.auth">true</prop>
+             	<prop key="mail.smtp.port">2525</prop>
+             	<prop key="mail.debug">true</prop>
+    			<prop key="mail.smtp.starttls.enable">true</prop>
+        	</props>
+    	</property>
+	</bean>
+
+	<bean id="senderThread" class="com.etaap.mail.SendMailServer" factory-method="getInstance">  
+ 		<property name="mailSender" ref="mailSender" />  
+	</bean>
+
+	<!-- declare datasource bean -->
+ 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+  		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+  		<property name="url" value="jdbc:mysql://localhost:3306/JJapi" />
+  		<property name="username" value="root" />
+		<property name="password" value="namasiva2005" />
+	</bean>
+</beans>

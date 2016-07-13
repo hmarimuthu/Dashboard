@@ -1,0 +1,14 @@
+package com.etaap.dao;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.etaap.domain.UserStory;
+
+public interface UserStoryDao {
+
+	public List<UserStory> getDetails(HashMap<String, Object> params);
+
+	public void insertData(Map<String, List<UserStory>> userStoryMap);
+}
